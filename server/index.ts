@@ -1,18 +1,8 @@
-import express from 'express';
-import 'reflect-metadata';
-import { AppDataSource } from './config/ormconfig';
-import router from './routes';
+import app from './app';
+import 'dotenv/config';
 
-const app = express();
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 3000;
 
-app.use(express.json());
-
-// Connect to Database
-AppDataSource.initialize()
-  .then(() => {
-    app.use('/', router);
-    console.log('Connected to the database');
-    app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
-  })
-  .catch((error) => console.log('Database connection error:', error));
+app.listen(PORT, () => {
+  console.log(`Server is running on http://localhost:${PORT}`);
+});
