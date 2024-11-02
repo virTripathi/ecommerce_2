@@ -7,6 +7,8 @@ CREATE TYPE status_enum AS ENUM ('active', 'inactive');
 CREATE TYPE role_enum AS ENUM ('user', 'admin', 'superadmin');
 CREATE TYPE activity_type_enum AS ENUM ('create', 'read', 'update', 'delete', 'other');
 CREATE TYPE model_enum AS ENUM ('free', 'paid');
+CREATE TYPE purchase_status_enum AS ENUM ('pending', 'success', 'fail');
+CREATE TYPE purchase_type_enum AS ENUM ('payment', 'subscription');
 
 CREATE TABLE users (
     id SERIAL PRIMARY KEY,
@@ -15,6 +17,7 @@ CREATE TABLE users (
     mobile_number VARCHAR(15),
     address TEXT,
     password VARCHAR(255),
+    is_prime_user BOOLEAN DEFAULT FALSE,
     is_super_admin BOOLEAN DEFAULT FALSE,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
@@ -91,7 +94,8 @@ CREATE TABLE products (
     name VARCHAR(255),
     price DECIMAL(10, 2),
     description TEXT,
-    stock_availability INTEGER
+    is_subscription_product BOOLEAN DEFAULT false,
+    stock_availability INTEGER DEFAULT NULL,
     status_id INTEGER REFERENCES statuses(id) ON DELETE SET NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     created_by INTEGER REFERENCES users(id) ON DELETE SET NULL,
@@ -99,10 +103,21 @@ CREATE TABLE products (
     updated_by INTEGER REFERENCES users(id) ON DELETE SET NULL
 );
 
-CREATE TABLE user_product (
-    user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
-    product_id INTEGER REFERENCES products(id) ON DELETE CASCADE,
-    PRIMARY KEY (user_id, product_id)
+CREATE TABLE purchases (
+    id SERIAL PRIMARY KEY,
+    user_id INTEGER REFERENCES users(id) ON DELETE SET NULL,
+    product_id INTEGER REFERENCES products(id) ON DELETE SET NULL,
+    purchase_type purchase_type_enum NOT NULL DEFAULT 'payment',
+    unit_price DECIMAL(10, 2) NOT NULL,
+    currency VARCHAR(3) DEFAULT 'INR',
+    quantity INTEGER NOT NULL,
+    total_price DECIMAL(10, 2),
+    stripe_session_id VARCHAR(255) DEFAULT NULL,
+    purchase_status purchase_status_enum NOT NULL DEFAULT 'pending',
+    created_by INTEGER REFERENCES users(id) ON DELETE SET NULL,
+    updated_by INTEGER REFERENCES users(id) ON DELETE SET NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE TABLE models (
@@ -152,39 +167,75 @@ INSERT INTO activities (module_id, type, code, status_id, created_by)
 VALUES
     (1, 'create', 'signup', 1, 1),
     (1, 'read', 'login', 1, 1),
-    (1, 'delete', 'logout', 1, 1);
+    (1, 'delete', 'logout', 1, 1),
     (2, 'read', 'get-products', 1, 1),
     (2, 'read', 'get-single-product', 1, 1),
     (2, 'create', 'save-product', 1, 1),
     (2, 'update', 'update-product', 1, 1),
-    (2, 'delete', 'delete-product', 1, 1);
+    (2, 'delete', 'delete-product', 1, 1),
     (3, 'read', 'get-roles', 1, 1),
-    (3, 'update', 'assign-role', 1, 1);
-    (4, 'read', 'get-purchases', 1, 1),
-    (4, 'read', 'get-single-purchase', 1, 1),
-    (4, 'create', 'save-purchase', 1, 1);
+    (3, 'update', 'assign-role', 1, 1),
+    (3,'create','purchase-product',1,1),
+    (3,'create','purchase-product-success',1,1),
+    (3,'create','purchase-product-failed',1,1),
+    (3,'create','product-purchases',1,1),
+    (3,'create','subscribe',1,1);
 
-
-
+-- Role ID 3: All activities
 INSERT INTO activity_role (activity_id, role_id) VALUES
-    (134, 3),  -- 'get-roles'
-    (135, 3),  -- 'assign-role'
-    (129, 3), -- 'save-purchase'
-    (130, 3), -- 'save-purchase'
-    (138, 3); -- 'save-purchase'
+    (4, 3),  -- 'get-products'
+    (5, 3),  -- 'get-single-product'
+    (6, 3),  -- 'save-product'
+    (7, 3),  -- 'update-product'
+    (8, 3),  -- 'delete-product'
+    (9, 3),  -- 'get-roles'
+    (10, 3), -- 'assign-role'
+    (11, 3), -- 'purchase-product'
+    (12, 3), -- 'purchase-product-success'
+    (13, 3), -- 'purchase-product-failed'
+    (14, 3), -- 'product-purchases'
+    (15, 3); -- 'subscribe'
 
+-- Role ID 2: Exclude 'get-roles' and 'assign-role'
 INSERT INTO activity_role (activity_id, role_id) VALUES
-    (131, 2),  -- 'save-product'
-    (132, 2),  -- 'update-product'
-    (133, 2),  -- 'delete-product'
-    (136, 2), -- 'get-purchases'
-    (137, 2), -- 'get-single-purchase'
-    (129, 2), -- 'save-purchase'
-    (130, 2), -- 'save-purchase'
-    (138, 2); -- 'save-purchase'
+    (4, 2),  -- 'get-products'
+    (5, 2),  -- 'get-single-product'
+    (6, 2),  -- 'save-product'
+    (7, 2),  -- 'update-product'
+    (8, 2),  -- 'delete-product'
+    (11, 2), -- 'purchase-product'
+    (12, 2), -- 'purchase-product-success'
+    (13, 2),-- 'purchase-product-failed'
+    (14, 2), -- 'product-purchases'
+    (15, 2); -- 'subscribe'
 
--- Assign remaining activity to the User role
+-- Role ID 1: No role-related activities and no product create/update/delete activities
 INSERT INTO activity_role (activity_id, role_id) VALUES
-    (129, 1), -- 'save-purchase'
-    (130, 1), -- 'save-purchase'
-    (138, 1); -- 'save-purchase'
+    (4, 1),  -- 'get-products'
+    (5, 1),  -- 'get-single-product'
+    (11, 1), -- 'purchase-product'
+    (12, 1), -- 'purchase-product-success'
+    (13, 1), -- 'purchase-product-failed'
+    (14, 1), -- 'product-purchases'
+    (15, 1), -- 'subscribe'
+
+
+INSERT INTO products (
+    name, 
+    price, 
+    description, 
+    is_subscription_product, 
+    stock_availability, 
+    status_id, 
+    created_by, 
+    updated_by
+) VALUES (
+    'App Subscription',
+    10,
+    'This is a default subscription product.',
+    TRUE,
+    NULL,
+    1,
+    1,
+    NULL 
+);

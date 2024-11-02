@@ -22,12 +22,13 @@ class AuthenticatedRouter extends BaseRouter {
         this.addRoute('post', '/products', [new CheckAuthorizationMiddleware('save-product').handle,...ProductValidation.save(),this.handleValidationErrors,ProductController.save]);
         this.addRoute('put', '/products/:id', [new CheckAuthorizationMiddleware('update-product').handle,...ProductValidation.update(),this.handleValidationErrors,ProductController.update]);
         this.addRoute('delete', '/products/:id', [new CheckAuthorizationMiddleware('delete-product').handle,...ProductValidation.delete(),this.handleValidationErrors,ProductController.delete]); 
-        
-        //purchases
-        this.addRoute('get', '/purchases', [new CheckAuthorizationMiddleware('get-purchases').handle]);
-        this.addRoute('get', '/purchases/:id', [new CheckAuthorizationMiddleware('get-single-purchase').handle]);
-        this.addRoute('post', '/purchases', [new CheckAuthorizationMiddleware('save-purchase').handle]);
+        this.addRoute('post', '/products/:id/purchase', [new CheckAuthorizationMiddleware('purchase-product').handle,...ProductValidation.purchase(),this.handleValidationErrors,ProductController.purchase]);
+        this.addRoute('get', '/products/:id/purchase/:purchaseId/success', [new CheckAuthorizationMiddleware('purchase-product-success').handle,...ProductValidation.success(),this.handleValidationErrors,ProductController.success]);
+        this.addRoute('get', '/products/:id/purchase/:purchaseId/failed', [new CheckAuthorizationMiddleware('purchase-product-failed').handle,...ProductValidation.failed(),this.handleValidationErrors,ProductController.failed]);
+        this.addRoute('get', '/product-purchases', [new CheckAuthorizationMiddleware('product-purchases').handle,ProductController.productPurchases]);
+        this.addRoute('post', '/subscribe', [new CheckAuthorizationMiddleware('subscribe').handle,ProductController.subscribe]);
     }
 }
+
 
 export default new AuthenticatedRouter().getRouter();

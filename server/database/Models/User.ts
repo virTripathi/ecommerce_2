@@ -9,6 +9,7 @@ export class User extends Model {
     public address!: string;
     public password!: string;
     public is_super_admin!: boolean;
+    public is_prime_user!: boolean;
     public created_at!: Date;
     public updated_at!: Date;
 }
@@ -41,6 +42,10 @@ User.init(
             allowNull: false,
         },
         is_super_admin: {
+            type: DataTypes.BOOLEAN,
+            defaultValue: false,
+        },
+        is_prime_user: {
             type: DataTypes.BOOLEAN,
             defaultValue: false,
         },

@@ -83,6 +83,39 @@ class ProductValidation {
                 .withMessage('Product ID must be a positive integer'),
         ];
     }
+
+    static purchase(): ValidationChain[] {
+        return [
+            param('id')
+                .isInt({ min: 1 })
+                .withMessage('Product ID must be a positive integer'),
+            body('quantity')
+                .isInt({ min: 1 })
+                .withMessage('Quantity must be a positive integer'),
+        ];
+    }
+
+    static success(): ValidationChain[] {
+        return [
+            param('id')
+                .isInt({ min: 1 })
+                .withMessage('Product ID must be a positive integer'),
+            param('purchaseId')
+                .isInt({ min: 1 })
+                .withMessage('Purchase ID must be a positive integer'),
+        ];
+    }
+
+    static failed(): ValidationChain[] {
+        return [
+            param('id')
+                .isInt({ min: 1 })
+                .withMessage('Product ID must be a positive integer'),
+            param('purchaseId')
+                .isInt({ min: 1 })
+                .withMessage('Purchase ID must be a positive integer'),
+        ];
+    }
 }
 
 export default ProductValidation;

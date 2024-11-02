@@ -7,6 +7,7 @@ import ActivityRole from './ActivityRole';
 import JwtToken from './JwtToken';
 import Product from './Product';
 import Status from './Status';
+import Purchase from './Purchase';
 
 // Define associations
 UserRole.belongsTo(Role, { foreignKey: 'role_id', targetKey: 'id' });
@@ -16,5 +17,5 @@ UserRole.belongsTo(User, { foreignKey: 'user_id', targetKey: 'id' });
 User.hasMany(UserRole, { foreignKey: 'user_id' });
 
 // Export models and Sequelize instance for use in other files
-export { User, Role, UserRole,Activity, ActivityRole, JwtToken, Product, Status };
+export { User, Role, UserRole,Activity, ActivityRole, JwtToken, Product, Status, Purchase };
 export default Database.sequelize;
