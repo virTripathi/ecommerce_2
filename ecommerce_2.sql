@@ -1,8 +1,3 @@
-DROP DATABASE IF EXISTS ecommerce_2;
-CREATE DATABASE ecommerce_2;
-
-\c ecommerce_2;
-
 CREATE TYPE status_enum AS ENUM ('active', 'inactive');
 CREATE TYPE role_enum AS ENUM ('user', 'admin', 'superadmin');
 CREATE TYPE activity_type_enum AS ENUM ('create', 'read', 'update', 'delete', 'other');
@@ -57,7 +52,7 @@ CREATE TABLE roles (
 CREATE TABLE user_role(
     user_id INTEGER REFERENCES users(id) ON DELETE SET NULL,
     role_id INTEGER REFERENCES roles(id) ON DELETE SET NULL
-)
+);
 
 CREATE TABLE modules (
     id SERIAL PRIMARY KEY,
@@ -156,30 +151,30 @@ INSERT INTO models (label, title, status_id, created_at, updated_at) VALUES
     ('free', 'Free Model', 1, DEFAULT, DEFAULT),
     ('paid', 'Paid Model', 1, DEFAULT, DEFAULT);
 
-INSERT INTO modules (label, title, client_side_url, status_id, created_by)
+INSERT INTO modules (label, title, client_side_url, status_id)
 VALUES 
-    ('auth', 'Authentication Module', '/auth', 1, 1),
-    ('products', 'Products Module', '/products', 1, 1),
-    ('role', 'Role Module', '/roles', 1, 1),
-    ('purchase', 'Purchase Module', '/purchases', 1, 1);
+    ('auth', 'Authentication Module', '/auth', 1),
+    ('products', 'Products Module', '/products', 1),
+    ('role', 'Role Module', '/roles', 1),
+    ('purchase', 'Purchase Module', '/purchases', 1);
 
-INSERT INTO activities (module_id, type, code, status_id, created_by) 
+INSERT INTO activities (module_id, type, code, status_id) 
 VALUES
-    (1, 'create', 'signup', 1, 1),
-    (1, 'read', 'login', 1, 1),
-    (1, 'delete', 'logout', 1, 1),
-    (2, 'read', 'get-products', 1, 1),
-    (2, 'read', 'get-single-product', 1, 1),
-    (2, 'create', 'save-product', 1, 1),
-    (2, 'update', 'update-product', 1, 1),
-    (2, 'delete', 'delete-product', 1, 1),
-    (3, 'read', 'get-roles', 1, 1),
-    (3, 'update', 'assign-role', 1, 1),
-    (3,'create','purchase-product',1,1),
-    (3,'create','purchase-product-success',1,1),
-    (3,'create','purchase-product-failed',1,1),
-    (3,'create','product-purchases',1,1),
-    (3,'create','subscribe',1,1);
+    (1, 'create', 'signup', 1),
+    (1, 'read', 'login', 1),
+    (1, 'delete', 'logout', 1),
+    (2, 'read', 'get-products', 1),
+    (2, 'read', 'get-single-product', 1),
+    (2, 'create', 'save-product', 1),
+    (2, 'update', 'update-product', 1),
+    (2, 'delete', 'delete-product', 1),
+    (3, 'read', 'get-roles', 1),
+    (3, 'update', 'assign-role', 1),
+    (3,'create','purchase-product',1),
+    (3,'create','purchase-product-success',1),
+    (3,'create','purchase-product-failed',1),
+    (3,'create','product-purchases',1),
+    (3,'create','subscribe',1);
 
 -- Role ID 3: All activities
 INSERT INTO activity_role (activity_id, role_id) VALUES
@@ -217,7 +212,7 @@ INSERT INTO activity_role (activity_id, role_id) VALUES
     (12, 1), -- 'purchase-product-success'
     (13, 1), -- 'purchase-product-failed'
     (14, 1), -- 'product-purchases'
-    (15, 1), -- 'subscribe'
+    (15, 1); -- 'subscribe'
 
 
 INSERT INTO products (
@@ -226,16 +221,12 @@ INSERT INTO products (
     description, 
     is_subscription_product, 
     stock_availability, 
-    status_id, 
-    created_by, 
-    updated_by
+    status_id
 ) VALUES (
     'App Subscription',
     10,
     'This is a default subscription product.',
     TRUE,
     NULL,
-    1,
-    1,
-    NULL 
+    1
 );
