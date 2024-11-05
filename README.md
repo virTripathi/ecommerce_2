@@ -56,5 +56,9 @@ Your app should now be running, and you can access it at the configured port in 
 ## Usage
 Once the app is running, you can start ordering.
 
+## DB Schema and API Documentation
+https://docs.google.com/document/d/1kLknrNf55GqZa4W507CpzJC-kO2gD8a1BtJUvR7F6jk/edit?usp=sharing
+
+
 ## Additional Information
 For further information on advanced configuration or troubleshooting, please [contact me](mailto:viratofficial07@gmail.com).
